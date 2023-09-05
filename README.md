@@ -1,7 +1,6 @@
-# Hired Labs, Inc. Main Website and Tools
+# Meal Planner
 
-This is the main website for Hired Labs, Inc. It serves as a platform for web applications and tools to help accomplish
-our mission of ending veteran underemployment.
+Simple command-line tool for automatically generating meal plans by randomizing a list of recipes and ordering them in a list according to user-provided constraints. 
 
 ## Installation
 
@@ -74,7 +73,7 @@ Your browser may warn you that this password is not secure. You can create anoth
 if you wish. Simply run the command below and follow the prompts:
 
 ```bash
-docker-compose run --rm django python manage.py createsuperuser 
+docker-compose run --rm django python manage.py createsuperuser
 ```
 
 ## Contributing
