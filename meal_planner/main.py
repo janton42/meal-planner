@@ -7,7 +7,7 @@ from classes import Recipe, MealPlan
 
 def main():
     # retreive data
-    initial_data = read_data('meal_planner/output/recipes/')
+    initial_data = read_data('./output/recipes/')
     choice = int(input('\n\nWhat would you like to do?\n'
                         '(1) See Recipes\n'
                         '(2) Make meal plan\n'
@@ -36,8 +36,6 @@ def main():
             healthy = input('Is this recipe healthy (yes/no)?     ')
             if healthy == 'yes':
                 new_recipe.set_health_value(True)
-            else:
-                new_recipe.set_health_value(False)
             new_recipe.save_self()
             main()
         elif next == 9:

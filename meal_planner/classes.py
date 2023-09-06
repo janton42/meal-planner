@@ -11,7 +11,7 @@ class Recipe(object):
         super(Recipe, self).__init__()
         self.name = name
         self.ingredients = list()
-        self.output_path = './meal_planner/output/'
+        self.output_path = './output/'
         self.directions = ''
         self.is_healthy = False
 
