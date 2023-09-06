@@ -64,30 +64,33 @@ def main():
         print('***Invalid Input***\n\nReturning to main menu')
         main()
 
+class ScatterTextWidget(BoxLayout):
+    pass
+
+
 class MealPlanner(App):
     def build(self):
-        b = BoxLayout(orientation='vertical')
-        t = TextInput(
-            font_size=25,
-            size_hint_y=None,
-            height=150,
-            text='default')
+        return ScatterTextWidget()
+        # b = BoxLayout(orientation='vertical')
+        # t = TextInput(
+        #     font_size=25,
+        #     size_hint_y=None,
+        #     height=150,
+        #     text='default')
+        #
+        # f = FloatLayout()
+        # s = Scatter()
+        # l = Label(text='default', font_size=150)
+        #
+        # t.bind(text=l.setter('text'))
+        #
+        # f.add_widget(s)
+        # s.add_widget(l)
+        #
+        # b.add_widget(t)
+        # b.add_widget(f)
+        # return b
 
-        f = FloatLayout()
-        s = Scatter()
-        l = Label(text='default', font_size=150)
-
-        t.bind(text=l.setter('text'))
-
-        f.add_widget(s)
-        s.add_widget(l)
-
-        b.add_widget(t)
-        b.add_widget(f)
-        return b
-
-def some_function(*args):
-    print('text changed')
 
 if __name__ == '__main__':
     MealPlanner().run()
