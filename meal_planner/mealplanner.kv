@@ -1,16 +1,72 @@
 
+# Everything to the right of a ':' is pure python
+# imports can be done, but has different syntax
+## "#:import keyword module_name
+## i.e. #:import random random
+
+# General Functions Example
 <ScatterTextWidget>:
     orientation: 'vertical'
+    # graphics instructions go here, but canvas is not a widget or an
+    # instruction. These are automatically built in the background, but
+    # '.before' and '.after' can still be applied, as in: canvas.before
+    # canvas:
+    #     Color:
+    #         rgba: 0, 0, 1, 1
+    #     Rectangle:
+    #         pos: self.pos
+    #         size: self.size
     TextInput:
         id: test_input
-        font_size: 150
+        font_size: 50
         size_hint_y: None
         height: 200
+        # This is a property
         text: 'default'
+        # This is 'on_' + property, which executes whatever is on the
+        # right of the colon whenever the referenced property changes
+        # 'root' refers to the root widget, here ScatterTextWidget
         on_text: root.change_label_color()
     FloatLayout:
         Scatter:
+            # set default starting location to center of screen
+            center: self.parent.center
+            # this sets the default to none, overriding inheritance
+            size_hint: None, None
+            # set the scatter to be the same size as te label
+            size: test_label.size
+            # use canvas to debug by drawing where things are
+            # canvas.after:
+            #     Color:
+            #         rgba: 1, 0, 0, 0.5
+            #     Rectangle:
+            #         pos: self.pos
+            #         size: self.size
+
             Label:
                 id: test_label
                 text: test_input.text
                 font_size: 150
+                color: root.text_color
+                # set the label to be as big as the text
+                size: self.texture_size
+                # canvas:
+                #     Color:
+                #         rgba: 0, 1, 0, 0.5
+                #     Rectangle:
+                #         pos: self.pos
+                #         size: self.size
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 150
+        Label:
+            id: label1
+            text: test_input.text[:3][::-1]
+            font_size: 100
+            color: root.text_color
+        Label:
+            id: label2
+            text: test_input.text[:3][::-1]
+            font_size: 100
+            color: root.text_color
