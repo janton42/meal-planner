@@ -148,3 +148,5 @@ gcp-creds
 gcloud
 .config/
 certs/
+
+.buildozer/
