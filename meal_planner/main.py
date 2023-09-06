@@ -1,5 +1,6 @@
 import os
 import csv
+import random
 
 from funcs import read_data, write_data
 from classes import Recipe, MealPlan
@@ -65,31 +66,16 @@ def main():
         main()
 
 class ScatterTextWidget(BoxLayout):
-    pass
+    def change_label_color(self, *args):
+        color = [random.random() for i in range(0,3)] + [1]
+        label = self.ids['test_label']
+        label.color = color
+
 
 
 class MealPlanner(App):
     def build(self):
         return ScatterTextWidget()
-        # b = BoxLayout(orientation='vertical')
-        # t = TextInput(
-        #     font_size=25,
-        #     size_hint_y=None,
-        #     height=150,
-        #     text='default')
-        #
-        # f = FloatLayout()
-        # s = Scatter()
-        # l = Label(text='default', font_size=150)
-        #
-        # t.bind(text=l.setter('text'))
-        #
-        # f.add_widget(s)
-        # s.add_widget(l)
-        #
-        # b.add_widget(t)
-        # b.add_widget(f)
-        # return b
 
 
 if __name__ == '__main__':
