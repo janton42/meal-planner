@@ -4,6 +4,12 @@ import csv
 from funcs import read_data, write_data
 from classes import Recipe, MealPlan
 
+from kivy.app import App
+
+from kivy.uix.button import Button
+from kivy.uix.scatter import Scatter
+from kivy.uix.label import Label
+from kivy.uix.floatlayout import FloatLayout
 
 def main():
     # retreive data
@@ -56,6 +62,16 @@ def main():
         print('***Invalid Input***\n\nReturning to main menu')
         main()
 
+class MealPlanner(App):
+    def build(self):
+        f = FloatLayout()
+        s = Scatter()
+        l = Label(text='Hello!', font_size=150)
+
+        f.add_widget(s)
+        s.add_widget(l)
+        return (f)
+
+
 if __name__ == '__main__':
-    print('\n' * 50)
-    main()
+    MealPlanner().run()
