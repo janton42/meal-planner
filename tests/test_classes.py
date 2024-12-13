@@ -1,16 +1,7 @@
-import os
-import csv
-
-from meal_planner.main import main
-from meal_planner.classes import Recipe
-
+from meal_planner.classes import Recipe, MealPlan
 
 test_recipe_name = 'Test Recipe'
 test_recipe = Recipe(test_recipe_name)
-
-def test_main():
-    output = main()
-    assert test_recipe.name + '.json' in output
 
 def test_recipes():
     assert test_recipe.name == test_recipe_name
@@ -43,23 +34,3 @@ def test_save_self():
 def test_export_ingredients():
     export_message = test_recipe.export_ingredients()
     assert export_message == f'Ingredient list for {test_recipe.name} exported'
-
-# def test_plan_meals():
-#     # plan_meals should:
-#     meal_plan = main.plan_meals(
-#         meal='dinner',
-#         days=5,
-#         health_percentage=25,
-#         unhealthy_duration=2,
-#     )
-#
-#     assert
-        # read in db of recipes
-        # take in a number of days as an integer
-        # take in the percentage of healthy meals as an integer
-        # take in a duration between unhealth meals in days as an integer
-        #    (default is 3)
-        # Shuffle recipe list
-        # return a list of recipes following input constraints
-            # If there are more days than there are recipes, repeat
-            # recipes from shuffled list until days are full

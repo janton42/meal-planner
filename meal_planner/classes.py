@@ -2,7 +2,7 @@ import os
 import json
 import csv
 
-from funcs import read_data, write_data, shuffle
+from meal_planner.funcs import read_data, write_data, shuffle
 
 class Recipe(object):
     """docstring for Recipe."""
@@ -24,9 +24,10 @@ class Recipe(object):
             print(f'{i["name"]} added to {self.name} ingredients list')
 
     def export_ingredients(self):
+        os.makedirs(self.output_path, exist_ok=True)
         write_data(
                 data = self.ingredients,
-                path = self.output_path + self.name + '_ingredients_export.json'
+                path=self.output_path + self.name + '_ingredients_export.json'
             )
         print(f'Ingredient list for {self.name} exported')
         return f'Ingredient list for {self.name} exported'
@@ -41,6 +42,8 @@ class Recipe(object):
             return f'"is_healthy" has been set to "{self.is_healthy}".'
 
     def save_self(self):
+        recipes_path = os.path.join(self.output_path, 'recipes')
+        os.makedirs(recipes_path, exist_ok=True)
         filename = self.name + '.json'
         write_data(
                 data = {

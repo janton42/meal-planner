@@ -2,8 +2,8 @@ import os
 import csv
 import random
 
-from funcs import read_data, write_data
-from classes import Recipe, MealPlan
+from meal_planner.funcs import read_data, write_data
+from meal_planner.classes import Recipe, MealPlan
 
 from kivy.app import App
 
