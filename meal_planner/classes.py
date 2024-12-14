@@ -16,7 +16,7 @@ class RealThing:
         return self.subpath
 
     def set_filename(self, filename):
-        self.filename = filename
+        self.filename = filename + '.json'
         return self.filename
 
     def save_self(self):
@@ -24,7 +24,6 @@ class RealThing:
             raise ValueError('Subpath not set.')
         elif self.filename == '':
             raise ValueError('Filename not set.')
-        self.filename += '.json'
         save_path = os.path.join(self.output_path, self.subpath, self.filename)
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         data = self.__dict__
@@ -35,12 +34,14 @@ class RealThing:
 class Ingredient(RealThing):
     """docstring for Ingredient."""
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         super().__init__(name)
-        self.state = ''
-        self.measures = list()
-        self.expiration = ''
-        self.location = ''
+        self.state = kwargs.get('state', '')
+        self.measures = kwargs.get('measures', list())
+        self.expiration = kwargs.get('expiration', '')
+        self.location = kwargs.get('location', '')
+        self.subpath = 'ingredients'
+        self.filename = name + '.json'
 
     # Create operations for the Ingredient class
     def set_state(self, state: str):
@@ -52,9 +53,14 @@ class Ingredient(RealThing):
             print(f'State has been set to "{self.state}".')
             return f'State has been set to "{self.state}".'
 
-    def add_measure(self, measure: dict):
-        self.measures.append(measure)
-        print(f'{measure["quantity"]} of {self.name} added to measures list.')
+    def add_measure(self, measure: str):
+        if measure in self.measures:
+            print(f'{measure} of {self.name} already in measures list.')
+            return f'{measure} of {self.name} already in measures list.'
+        else:
+            self.measures.append(measure)
+            print(f'{measure} of {self.name} added to measures list.')
+            return f'{measure} of {self.name} added to measures list.'
 
     def set_expiration(self, expiration: str):
         if expiration == self.expiration:
@@ -90,9 +96,9 @@ class Ingredient(RealThing):
     def remove_measure(self, measure: dict):
         if measure in self.measures:
             self.measures.remove(measure)
-            print(f'{measure["quantity"]} of {self.name} removed from measures list.')
+            print(f'{measure} of {self.name} removed from measures list.')
         else:
-            print(f'{measure["quantity"]} of {self.name} not found in measures list.')
+            print(f'{measure} of {self.name} not found in measures list.')
 
 
 
@@ -109,12 +115,14 @@ class Recipe(RealThing):
         self.ingredients = list()
         self.directions = ''
         self.is_healthy = False
+        self.subpath = 'recipes'
+        self.filename = name + '.json'
 
     # Create operations for the Recipe class
     def add_ingredients(self, ingredients: list):
         for i in ingredients:
             self.ingredients.append(i)
-            print(f'{i["name"]} added to {self.name} ingredients list')
+            print(f'{i.name} added to {self.name} ingredients list')
 
     def add_directions(self, directions: str):
         self.directions = directions

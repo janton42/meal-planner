@@ -17,8 +17,8 @@ def test_set_subpath(real_thing):
 
 def test_set_filename(real_thing):
     filename = 'test_filename'
-    assert real_thing.set_filename(filename) == filename
-    assert real_thing.filename == filename
+    full_filename = filename + '.json'
+    assert real_thing.set_filename(filename) == full_filename
 
 def test_save_self_without_subpath(real_thing):
     with pytest.raises(ValueError, match='Subpath not set.'):
@@ -104,6 +104,35 @@ def test_remove_measure(ingredient):
 
 def test_str(ingredient):
     assert str(ingredient) == 'Tomato'
+
+def test_ingredient_with_kwargs():
+    ingredient = Ingredient('Tomato', state='Fresh', measures=[{'quantity': '1 cup'}], expiration='2023-12-31', location='Fridge')
+    assert ingredient.name == 'Tomato'
+    assert ingredient.state == 'Fresh'
+    assert ingredient.measures == [{'quantity': '1 cup'}]
+    assert ingredient.expiration == '2023-12-31'
+    assert ingredient.location == 'Fridge'
+
+def test_ingredient_without_kwargs():
+    ingredient = Ingredient('Tomato')
+    assert ingredient.name == 'Tomato'
+    assert ingredient.state == ''
+    assert ingredient.measures == []
+    assert ingredient.expiration == ''
+    assert ingredient.location == ''
+
+def test_add_measure_new(ingredient):
+    measure = '2 cups'
+    response = ingredient.add_measure(measure)
+    assert measure in ingredient.measures
+    assert response == '2 cups of Tomato added to measures list.'
+
+def test_add_measure_duplicate(ingredient):
+    measure = '2 cups'
+    ingredient.add_measure(measure)
+    response = ingredient.add_measure(measure)
+    assert ingredient.measures.count(measure) == 1
+    assert response == '2 cups of Tomato already in measures list.'
 
 # Recipe tests
 @pytest.fixture
