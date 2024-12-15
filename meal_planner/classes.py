@@ -46,8 +46,29 @@ class Ingredient(RealThing):
         self.measures = kwargs.get('measures', list())
         self.expiration = kwargs.get('expiration', '')
         self.location = kwargs.get('location', '')
+        self.macros = kwargs.get('macros', dict())
+        self.meal_role = kwargs.get('meal_role', '')
 
     # Create operations for the Ingredient class
+
+    def set_meal_role(self, meal_role: str):
+        if meal_role == self.meal_role:
+            print(f'Meal role is already set to "{self.meal_role}".')
+            return f'Meal role is already set to "{self.meal_role}".'
+        else:
+            self.meal_role = meal_role
+            print(f'Meal role has been set to "{self.meal_role}".')
+            return f'Meal role has been set to "{self.meal_role}".'
+
+    def set_macros(self, macros: dict):
+        if macros == self.macros:
+            print(f'Macros are already set to {self.macros}.')
+            return f'Macros are already set to {self.macros}.'
+        else:
+            self.macros = macros
+            print(f'Macros have been set to {self.macros}.')
+            return f'Macros have been set to {self.macros}.'
+
     def set_state(self, state: str):
         if state == self.state:
             print(f'State is already set to "{self.state}".')
@@ -147,6 +168,7 @@ class Recipe(RealThing):
         self.ingredients = [i for i in self.ingredients if i['name'] != ingredient.name]
         print(f"{ingredient.name} removed from {self.name} ingredients list.")
 
+
 class Storage(RealThing):
     """docstring for Storage."""
 
@@ -204,6 +226,7 @@ class Kitchen(RealThing):
             print(f"{storage['name']}/")
             for item_name, quantity in storage['contents'].items():
                 print(f"  ├── {item_name} ({quantity})")
+
     def refresh_data(self, **kwargs):
         storages_path = kwargs.get('storages_path', './output/storages/')
         recipes_path = kwargs.get('recipes_path', './output/recipes/')
@@ -212,3 +235,14 @@ class Kitchen(RealThing):
         self.storages = read_data(storages_path)
         self.recipes = read_data(recipes_path)
         self.ingredients = read_data(ingredients_path)
+
+    def make_meal_plan(self, days: int):
+        meal_plan = dict()
+        for day in range(days):
+            meal_plan[day] = {
+                'veggie': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'veggie']),
+                'protein': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'protein']),
+                'carb': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'carb']),
+            }
+
+        return meal_plan

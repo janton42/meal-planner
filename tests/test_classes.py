@@ -181,6 +181,39 @@ def test_add_measure_duplicate(ingredient):
     assert response == '2 cups of Tomato already in measures list.'
 
 
+def test_set_macros():
+    ingredient = Ingredient('Tomato')
+
+    # Test setting macros for the first time
+    response = ingredient.set_macros({'carbs': 'low', 'fats': 'medium', 'protein': 'high'})
+    assert ingredient.macros == {'carbs': 'low', 'fats': 'medium', 'protein': 'high'}
+    assert response == "Macros have been set to {'carbs': 'low', 'fats': 'medium', 'protein': 'high'}."
+
+    # Test setting the same macros again
+    response = ingredient.set_macros({'carbs': 'low', 'fats': 'medium', 'protein': 'high'})
+    assert response == "Macros are already set to {'carbs': 'low', 'fats': 'medium', 'protein': 'high'}."
+
+    # Test changing the macros
+    response = ingredient.set_macros({'carbs': 'medium', 'fats': 'low', 'protein': 'medium'})
+    assert ingredient.macros == {'carbs': 'medium', 'fats': 'low', 'protein': 'medium'}
+    assert response == "Macros have been set to {'carbs': 'medium', 'fats': 'low', 'protein': 'medium'}."
+
+    # Test setting macros to an empty dictionary
+    response = ingredient.set_macros({})
+    assert ingredient.macros == {}
+    assert response == "Macros have been set to {}."
+
+# Test for set_meal_role method
+def test_set_meal_role(ingredient):
+    response = ingredient.set_meal_role('carb')
+    assert ingredient.meal_role == 'carb'
+    assert response == 'Meal role has been set to "carb".'
+
+    response = ingredient.set_meal_role('carb')
+    assert response == 'Meal role is already set to "carb".'
+
+# Test for make_meal_plan method
+
 # Recipe tests
 @pytest.fixture
 def recipe():
@@ -339,7 +372,17 @@ def kitchen(tmp_path):
     with open(recipes_path / "blt_sandwich.json", "w") as f:
         json.dump({"name": "BLT Sandwich", "ingredients": [{"name": "Bacon", "quantity": "1 lb."}], "directions": "Cook the bacon until crispy.", "is_healthy": False}, f)
     with open(ingredients_path / "tomato.json", "w") as f:
-        json.dump({"name": "Tomato", "state": "Fresh", "measures": ["1 cup"], "expiration": "2023-12-31", "location": "Fridge"}, f)
+        json.dump({"name": "Tomato", "state": "Fresh", "measures": ["1 cup"], "expiration": "2023-12-31",
+                   "location": "Fridge", "macros": {"protein": "low", "fats": "low", "carbs": "low"},
+                   "meal_role": "veggie"}, f)
+    with open(ingredients_path / "bacon.json", "w") as f:
+        json.dump({"name": "bacon", "state": "solid", "measures": ["lb"], "expiration": "2023-12-31",
+                   "location": "fridge", "macros": {"protein": "high", "fats": "high", "carbs": "low"},
+                   "meal_role": "protein"}, f)
+    with open(ingredients_path / "bread.json", "w") as f:
+        json.dump({"name": "bread", "state": "solid", "measures": ["slice"], "expiration": "2023-12-31",
+                   "location": "cupboard", "macros": {"protein": "low", "fats": "low", "carbs": "high"},
+                   "meal_role": "carb"}, f)
 
     return Kitchen("Test Kitchen", storages_path=storages_path, recipes_path=recipes_path, ingredients_path=ingredients_path)
 
@@ -382,10 +425,59 @@ def test_refresh_data(kitchen, tmp_path):
     with open(new_recipes_path / "tomato_soup.json", "w") as f:
         json.dump({"name": "Tomato Soup", "ingredients": [{"name": "Tomato", "quantity": "2 cups"}], "directions": "Blend the tomatoes.", "is_healthy": True}, f)
     with open(new_ingredients_path / "lettuce.json", "w") as f:
-        json.dump({"name": "Lettuce", "state": "Fresh", "measures": ["1 leaf"], "expiration": "2023-12-31", "location": "Fridge"}, f)
+        json.dump({"name": "Lettuce", "state": "Fresh", "measures": ["1 leaf"], "expiration": "2023-12-31",
+                   "location": "Fridge", "macros": {"protein": "low", "fats": "low", "carbs": "low"},
+                   "meal_role": "veggie"}, f)
 
     kitchen.refresh_data(storages_path=new_storages_path, recipes_path=new_recipes_path, ingredients_path=new_ingredients_path)
 
     assert 'fridge' in [s for s in kitchen.storages]
     assert 'tomato_soup' in [r for r in kitchen.recipes]
     assert ('lettuce') in [i for i in kitchen.ingredients]
+
+def test_make_meal_plan_zero_days(kitchen):
+    meal_plan = kitchen.make_meal_plan(0)
+    assert meal_plan == {}
+
+def test_make_meal_plan_single_day(kitchen):
+
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    assert 'veggie' in meal_plan[0]
+    assert 'protein' in meal_plan[0]
+    assert 'carb' in meal_plan[0]
+
+def test_make_meal_plan_multiple_days(kitchen):
+    meal_plan = kitchen.make_meal_plan(3)
+    assert len(meal_plan) == 3
+    for day in range(3):
+        assert 'veggie' in meal_plan[day]
+        assert 'protein' in meal_plan[day]
+        assert 'carb' in meal_plan[day]
+
+def test_make_meal_plan_no_ingredients(kitchen):
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    assert meal_plan[0]['veggie'] == []
+    assert meal_plan[0]['protein'] == []
+    assert meal_plan[0]['carb'] == []
+
+def test_make_meal_plan_no_meal_roles(kitchen):
+    for ingredient in kitchen.ingredients.values():
+        ingredient['meal_role'] = ''
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    assert meal_plan[0]['veggie'] == []
+    assert meal_plan[0]['protein'] == []
+    assert meal_plan[0]['carb'] == []
+
+def test_make_meal_plan_with_meal_roles(kitchen):
+    kitchen.ingredients['tomato']['meal_role'] = 'veggie'
+    kitchen.ingredients['bacon']['meal_role'] = 'protein'
+    kitchen.ingredients['bread']['meal_role'] = 'carb'
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    assert kitchen.ingredients['tomato'] in meal_plan[0]['veggie']
+    assert kitchen.ingredients['bacon'] in meal_plan[0]['protein']
+    assert kitchen.ingredients['bread'] in meal_plan[0]['carb']
