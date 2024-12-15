@@ -378,9 +378,9 @@ def kitchen(tmp_path):
         json.dump({"name": "BLT Sandwich", "ingredients": [{"name": "Bacon", "quantity": "1 lb."}],
                    "directions": "Cook the bacon until crispy.", "is_healthy": False,
                    "meal_roles": [
-                          "protein",
-                          "carb",
-                          "veggie"
+                       "protein",
+                       "carb",
+                       "veggie"
                    ], "subpath": "recipes"}, f)
     with open(ingredients_path / "tomato.json", "w") as f:
         json.dump({"name": "Tomato", "state": "Fresh", "measures": ["1 cup"], "expiration": "2023-12-31",
@@ -494,15 +494,29 @@ def test_make_meal_plan_no_meal_roles(kitchen):
     assert meal_plan[0]['carb'] == []
 
 
-def test_make_meal_plan_with_meal_roles(kitchen):
+def test_make_meal_plan_with_meal_roles_and_storage(kitchen):
     kitchen.ingredients['tomato']['meal_role'] = 'veggie'
     kitchen.ingredients['bacon']['meal_role'] = 'protein'
     kitchen.ingredients['bread']['meal_role'] = 'carb'
+    kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1, 'bread': 1}
     meal_plan = kitchen.make_meal_plan(1)
     assert len(meal_plan) == 1
-    assert kitchen.ingredients['tomato'] in meal_plan[0]['veggie']
-    assert kitchen.ingredients['bacon'] in meal_plan[0]['protein']
-    assert kitchen.ingredients['bread'] in meal_plan[0]['carb']
+    assert any(ingredient['name'] == 'tomato' for ingredient in meal_plan[0]['veggie'])
+    assert any(ingredient['name'] == 'bacon' for ingredient in meal_plan[0]['protein'])
+    assert any(ingredient['name'] == 'bread' for ingredient in meal_plan[0]['carb'])
+
+
+def test_make_meal_plan_excludes_non_storage_items(kitchen):
+    kitchen.ingredients['tomato']['meal_role'] = 'veggie'
+    kitchen.ingredients['bacon']['meal_role'] = 'protein'
+    kitchen.ingredients['bread']['meal_role'] = 'carb'
+    kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1}  # 'bread' is not in storage
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    assert any(ingredient['name'] == 'tomato' for ingredient in meal_plan[0]['veggie'])
+    assert any(ingredient['name'] == 'bacon' for ingredient in meal_plan[0]['protein'])
+    assert not any(ingredient['name'] == 'bread' for ingredient in meal_plan[0]['carb'])  # 'bread' should be excluded
+
 
 def test_add_meal_role(kitchen):
     recipe = load_record(kitchen.recipes['blt_sandwich'])

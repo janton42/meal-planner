@@ -197,11 +197,12 @@ class Storage(RealThing):
         self.contents = kwargs.get('contents', dict())
 
     # Create operations for the Storage class
-    def add_item(self, item: RealThing):
+    def add_item(self, item: Ingredient):
         if item.name not in self.contents:
             self.contents[item.name] = 1
         else:
             self.contents[item.name] += 1
+        item.location = self.name
         print(f'There are {self.contents[item.name]} {item.name} in {self.name}.')
 
     # Read operations for the Storage class
@@ -209,8 +210,9 @@ class Storage(RealThing):
         return self.contents
 
     # Delete operations for the Storage class
-    def remove_item(self, item: RealThing):
+    def remove_item(self, item: Ingredient):
         if self.contents[item.name] > 0:
+            item.location = ''
             self.contents[item.name] -= 1
             print(f'There are {self.contents[item.name]} {item.name} in {self.name}.')
         else:
@@ -258,10 +260,33 @@ class Kitchen(RealThing):
     def make_meal_plan(self, days: int):
         meal_plan = dict()
         for day in range(days):
-            meal_plan[day] = {
-                'veggie': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'veggie']),
-                'protein': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'protein']),
-                'carb': shuffle([i for i in self.ingredients.values() if i['meal_role'] == 'carb']),
-            }
+            veggie = shuffle(
+                    [i for i in self.ingredients.values()
+                     if i['meal_role'] == 'veggie' and i['location'] != ''])
+            protein = shuffle(
+                    [i for i in self.ingredients.values()
+                     if i['meal_role'] == 'protein' and i['location'] != ''])
+            carb = shuffle(
+                    [i for i in self.ingredients.values()
+                     if i['meal_role'] == 'carb' and i['location'] != ''])
+            if len(veggie) > 0:
+                veggie = veggie.pop(-1)
+            else:
+                veggie = None
 
+            if len(protein) > 0:
+                protein = protein.pop(-1)
+            else:
+                protein = None
+
+            if len(carb) > 0:
+                carb = carb.pop(-1)
+            else:
+                carb = None
+
+            meal_plan[day] = {
+                'veggie': veggie,
+                'protein': protein,
+                'carb': carb,
+            }
         return meal_plan

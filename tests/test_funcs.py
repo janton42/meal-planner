@@ -1,7 +1,7 @@
 import json
 import os
 
-from meal_planner.funcs import write_data, read_data, shuffle
+from meal_planner.funcs import write_data, read_data, shuffle, plan_display
 
 
 def test_write_data(tmp_path):
@@ -48,3 +48,34 @@ def test_shuffle():
     assert len(shuffled_deck) == len(deck)
     assert set(shuffled_deck) == set(deck)
     assert shuffled_deck != deck  # There's a small chance this could fail if shuffle returns the same order
+
+
+def test_plan_display(capsys):
+    plan = {
+        0: {
+            'veggie': [{'name': 'Carrot'}],
+            'protein': [{'name': 'Chicken'}],
+            'carb': [{'name': 'Rice'}]
+        },
+        1: {
+            'veggie': [{'name': 'Broccoli'}],
+            'protein': [{'name': 'Beef'}],
+            'carb': [{'name': 'Potato'}]
+        }
+    }
+
+    plan_display(plan)
+
+    captured = capsys.readouterr()
+    expected_output = (
+        "Day 0:\n"
+        " |--veggie: Carrot\n"
+        " |--protein: Chicken\n"
+        " |--carb: Rice\n\n"
+        "Day 1:\n"
+        " |--veggie: Broccoli\n"
+        " |--protein: Beef\n"
+        " |--carb: Potato\n\n"
+    )
+
+    assert captured.out == expected_output

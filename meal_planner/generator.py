@@ -13,3 +13,10 @@ def load_record(record: dict):
         print('Record not found.')
 
     return item
+
+
+def objectify(records: list[dict]) -> list:
+    objects = list()
+    for record in records:
+        objects.append(load_record(record))
+    return objects
