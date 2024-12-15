@@ -3,7 +3,7 @@ import csv
 import random
 
 from meal_planner.funcs import read_data, write_data
-from meal_planner.classes import Recipe, MealPlan
+from meal_planner.classes import Recipe
 
 from kivy.app import App
 
@@ -66,8 +66,7 @@ def main():
             main()
     elif choice == 2:
         days = input('How many days?      ')
-        new_plan = MealPlan(initial_data, days)
-        new_plan.make_plan()
+        new_plan = "I'm a new plan!"
         main()
     elif choice == 9:
         print('Good bye!')

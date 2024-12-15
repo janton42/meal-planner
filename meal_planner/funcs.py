@@ -2,23 +2,34 @@ import os
 import csv
 import json
 import random
+import logging
+
+from pathlib import Path
+
+# Configure logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # write date out as json input should be a python dictionary
 def write_data(data: dict, path: str):
-    # Print the path to debug
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logging.error(f'Error writing data to {path}: {e}')
+        raise
 
 # read json file to a python dictionary
 def read_data(path: str)-> dict:
+    path = Path(path)
     objects = os.listdir(path)
     data = dict()
     for obj in objects:
-        with open(path + obj, 'r') as f:
+        with open(path / obj, 'r') as f:
+            name = obj.split('.')[0]
             record = json.load(f)
             data.update(
-                {obj: record}
+                {name: record}
                 )
     return data
 

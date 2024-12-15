@@ -1,8 +1,7 @@
 import os
-import json
-import csv
 
 from meal_planner.funcs import read_data, write_data, shuffle
+
 
 class RealThing:
     def __init__(self, name):
@@ -31,17 +30,22 @@ class RealThing:
 
         confirmation = f'{self.name} saved to {self.subpath}.'
         return confirmation
+
+    def __str__(self):
+        return self.name
+
+
 class Ingredient(RealThing):
     """docstring for Ingredient."""
 
     def __init__(self, name, **kwargs):
         super().__init__(name)
+        self.subpath = 'ingredients'
+        self.filename = name + '.json'
         self.state = kwargs.get('state', '')
         self.measures = kwargs.get('measures', list())
         self.expiration = kwargs.get('expiration', '')
         self.location = kwargs.get('location', '')
-        self.subpath = 'ingredients'
-        self.filename = name + '.json'
 
     # Create operations for the Ingredient class
     def set_state(self, state: str):
@@ -80,7 +84,6 @@ class Ingredient(RealThing):
             print(f'Location has been set to "{self.location}".')
             return f'Location has been set to "{self.location}".'
 
-
     # Read operations for the Ingredient class
     def get_measures(self):
         return self.measures
@@ -92,7 +95,6 @@ class Ingredient(RealThing):
         return self.expiration
 
     # Delete operations for the Ingredient class
-
     def remove_measure(self, measure: dict):
         if measure in self.measures:
             self.measures.remove(measure)
@@ -101,28 +103,21 @@ class Ingredient(RealThing):
             print(f'{measure} of {self.name} not found in measures list.')
 
 
-
-    def __str__(self):
-        return self.name
-
-
-
 class Recipe(RealThing):
     """docstring for Recipe."""
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         super().__init__(name)
-        self.ingredients = list()
-        self.directions = ''
-        self.is_healthy = False
         self.subpath = 'recipes'
         self.filename = name + '.json'
+        self.ingredients = kwargs.get('ingredients', list())
+        self.directions = kwargs.get('directions', '')
+        self.is_healthy = kwargs.get('is_healthy', False)
 
     # Create operations for the Recipe class
-    def add_ingredients(self, ingredients: list):
-        for i in ingredients:
-            self.ingredients.append(i)
-            print(f'{i.name} added to {self.name} ingredients list')
+    def add_ingredient(self, ingredient: Ingredient, quantity: str):
+        self.ingredients.append({'name': ingredient.name, 'quantity': quantity})
+        print(f'{ingredient.name} added to {self.name} ingredients list.')
 
     def add_directions(self, directions: str):
         self.directions = directions
@@ -148,20 +143,17 @@ class Recipe(RealThing):
         return self.is_healthy
 
     # Delete operations for the Recipe class
-    def remove_ingredient(self, ingredient: dict):
-        if ingredient in self.ingredients:
-            self.ingredients.remove(ingredient)
-            print(f'{ingredient["name"]} removed from {self.name} ingredients list.')
-        else:
-            print(f'{ingredient["name"]} not found in {self.name} ingredients list.')
-
+    def remove_ingredient(self, ingredient):
+        self.ingredients = [i for i in self.ingredients if i['name'] != ingredient.name]
+        print(f"{ingredient.name} removed from {self.name} ingredients list.")
 
 class Storage(RealThing):
     """docstring for Storage."""
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         super().__init__(name)
-        self.contents = dict()
+        self.subpath = 'storages'
+        self.contents = kwargs.get('contents', dict())
 
     # Create operations for the Storage class
     def add_item(self, item: RealThing):
@@ -183,45 +175,40 @@ class Storage(RealThing):
         else:
             print(f'There are no {item.name} in {self.name}.')
 
-class MealPlan(object):
-    """docstring for MealPlan."""
 
-    def __init__(self, recipes, days):
-        super(MealPlan, self).__init__()
-        self.all_recipes = recipes
-        self.fatty_recipes = list()
-        self.healthy_recipes = list()
-        self.days = int(days)
-        self.healthy_meals = 80
-        self.fatty_gap = 3
+class Kitchen(RealThing):
+    def __init__(self, name, **kwargs):
+        super().__init__(name)
+        storages_path = kwargs.get('storages_path', './output/storages/')
+        recipes_path = kwargs.get('recipes_path', './output/recipes/')
+        ingredients_path = kwargs.get('ingredients_path', './output/ingredients/')
 
-    def split_recipes(self):
-        for recipe in self.all_recipes:
-            if self.all_recipes[recipe]['is_healthy'] == True:
-                self.healthy_recipes.append(recipe)
-            else:
-                self.fatty_recipes.append(recipe)
-        self.healthy_recipes = shuffle(self.healthy_recipes)
-        self.fatty_recipes = shuffle(self.fatty_recipes)
+        self.storages = read_data(storages_path)
+        self.recipes = read_data(recipes_path)
+        self.ingredients = read_data(ingredients_path)
 
-    def make_plan(self):
-        self.split_recipes()
-        meal_plan = list()
-        fr_use_count = 0
-        hr_use_count = 0
-        while self.days > 0:
-            if self.days % 3 == 0:
-                meal = self.fatty_recipes[fr_use_count].split('.')[0]
-                meal_plan.insert(0, meal)
-                fr_use_count += 1
-            else:
-                if hr_use_count == len(self.healthy_recipes):
-                    self.healthy_recipes = shuffle(self.healthy_recipes)
-                    hr_use_count = 0
-                meal = self.healthy_recipes[hr_use_count].split('.')[0]
-                meal_plan.insert(0, meal)
-                hr_use_count += 1
-            self.days -= 1
-        for meal in meal_plan:
-            print(meal)
-        return meal_plan
+    def display_storages(self):
+        for s in self.storages.values():
+            print(s['name'])
+
+    def display_recipes(self):
+        for r in self.recipes.values():
+            print(r['name'])
+
+    def display_ingredients(self):
+        for i in self.ingredients.values():
+            print(i['name'])
+
+    def show_inventory(self):
+        for storage in self.storages.values():
+            print(f"{storage['name']}/")
+            for item_name, quantity in storage['contents'].items():
+                print(f"  ├── {item_name} ({quantity})")
+    def refresh_data(self, **kwargs):
+        storages_path = kwargs.get('storages_path', './output/storages/')
+        recipes_path = kwargs.get('recipes_path', './output/recipes/')
+        ingredients_path = kwargs.get('ingredients_path', './output/ingredients/')
+
+        self.storages = read_data(storages_path)
+        self.recipes = read_data(recipes_path)
+        self.ingredients = read_data(ingredients_path)
