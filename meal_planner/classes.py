@@ -272,17 +272,17 @@ class Kitchen(RealThing):
             if len(veggie) > 0:
                 veggie = veggie.pop(-1)
             else:
-                veggie = None
+                veggie = []
 
             if len(protein) > 0:
                 protein = protein.pop(-1)
             else:
-                protein = None
+                protein = []
 
             if len(carb) > 0:
                 carb = carb.pop(-1)
             else:
-                carb = None
+                carb = []
 
             meal_plan[day] = {
                 'veggie': veggie,

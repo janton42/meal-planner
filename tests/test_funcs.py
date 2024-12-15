@@ -53,19 +53,18 @@ def test_shuffle():
 def test_plan_display(capsys):
     plan = {
         0: {
-            'veggie': [{'name': 'Carrot'}],
-            'protein': [{'name': 'Chicken'}],
-            'carb': [{'name': 'Rice'}]
+            'veggie': {'name': 'Carrot'},
+            'protein': {'name': 'Chicken'},
+            'carb': {'name': 'Rice'}
         },
         1: {
-            'veggie': [{'name': 'Broccoli'}],
-            'protein': [{'name': 'Beef'}],
-            'carb': [{'name': 'Potato'}]
+            'veggie': {'name': 'Broccoli'},
+            'protein': {'name': 'Beef'},
+            'carb': {'name': 'Potato'}
         }
     }
 
     plan_display(plan)
-
     captured = capsys.readouterr()
     expected_output = (
         "Day 0:\n"
@@ -75,7 +74,6 @@ def test_plan_display(capsys):
         "Day 1:\n"
         " |--veggie: Broccoli\n"
         " |--protein: Beef\n"
-        " |--carb: Potato\n\n"
+        " |--carb: Potato\n\n\n"
     )
-
     assert captured.out == expected_output

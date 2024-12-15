@@ -3,6 +3,7 @@ from meal_planner.classes import Kitchen, Storage, Ingredient, Recipe
 from meal_planner.funcs import plan_display
 
 def main(kitchen):
+    print('start main function')
     choice = int(
         input('*************\nEnter the number of your choice:\n'
               '0. Quit\n'
@@ -16,10 +17,14 @@ def main(kitchen):
               '8. Edit a Storage Location\n'
               '*************\n\n\n\n'
               ))
-    if choice == 1: # Make a Plan
+    if choice == 1:  # Make a Plan
+        print('make plan selected')
         days = int(input('How many days do you want to plan?  '))
+        print(f'{days} days selected')
         plan = kitchen.make_meal_plan(days)
+        print('plan made')
         plan_display(plan)
+        print('plan displayed')
         main(kitchen)
     elif choice == 2: # Show Inventory
         kitchen.show_inventory()
@@ -33,30 +38,7 @@ def main(kitchen):
         kitchen.refresh_data()
         main(kitchen)
     elif choice == 4: # Add a Recipe
-        name = input('Recipe Name:  ')
-        new_recipe = Recipe(name)
-        kitchen.show_inventory()
-        ingredients = input(''
-                            '\nEnter the ingredients with comma-separated quantities for this recipe\n  '
-                            '\tSeparate each ingredient with a semicolon\n': )
-        ingredient_list = ingredients.split(';')
-
-        for i in range(len(ingredient_list)):
-            ingredient_pair = dict()
-            ingredient_list[i] = ingredient_list[i].strip()
-            ingredient_list[i] = ingredient_list[i].split(',')
-            ingredient_pair['name'] = ingredient_list[i][0]
-            ingredient_pair['quantity'] = ingredient_list[i][1]
-
-        for i in kitchen.ingredients:
-            if i.name == ingredient:
-                ingredient = i
-        quantity = ingredients.split(',')[1]
-        new_recipe.add_ingredient(ingredient, quantity)
-        directions = input('Enter the directions for this recipe:  ')
-        new_recipe.add_directions(directions)
-        new_recipe.save_self()
-        kitchen.refresh_data()
+        print('Not yet implemented')
         main(kitchen)
     elif choice == 5: # Add a Storage Location
         name = input('Storage Location Name:  ')
@@ -67,10 +49,13 @@ def main(kitchen):
 
     elif choice == 6: # Edit an Ingredient
         print('Not yet implemented')
+        main(kitchen)
     elif choice == 7: # Edit a Recipe
         print('Not yet implemented')
+        main(kitchen)
     elif choice == 8: # Edit a Storage Location
         print('Not yet implemented')
+        main(kitchen)
 
     elif choice == 0:
         print('Good bye!')

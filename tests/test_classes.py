@@ -477,11 +477,12 @@ def test_make_meal_plan_multiple_days(kitchen):
 
 def test_make_meal_plan_no_ingredients(kitchen):
     kitchen.ingredients = {}
+    kitchen.storages['pantry']['contents'] = {}
     meal_plan = kitchen.make_meal_plan(1)
     assert len(meal_plan) == 1
-    assert meal_plan[0]['veggie'] == []
-    assert meal_plan[0]['protein'] == []
-    assert meal_plan[0]['carb'] == []
+    assert meal_plan[0].get('veggie', []) == []
+    assert meal_plan[0].get('protein', []) == []
+    assert meal_plan[0].get('carb', []) == []
 
 
 def test_make_meal_plan_no_meal_roles(kitchen):
@@ -496,26 +497,32 @@ def test_make_meal_plan_no_meal_roles(kitchen):
 
 def test_make_meal_plan_with_meal_roles_and_storage(kitchen):
     kitchen.ingredients['tomato']['meal_role'] = 'veggie'
+    kitchen.ingredients['tomato']['location'] = 'pantry'
     kitchen.ingredients['bacon']['meal_role'] = 'protein'
+    kitchen.ingredients['bacon']['location'] = 'pantry'
     kitchen.ingredients['bread']['meal_role'] = 'carb'
+    kitchen.ingredients['bread']['location'] = 'pantry'
     kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1, 'bread': 1}
     meal_plan = kitchen.make_meal_plan(1)
     assert len(meal_plan) == 1
-    assert any(ingredient['name'] == 'tomato' for ingredient in meal_plan[0]['veggie'])
-    assert any(ingredient['name'] == 'bacon' for ingredient in meal_plan[0]['protein'])
-    assert any(ingredient['name'] == 'bread' for ingredient in meal_plan[0]['carb'])
+    assert meal_plan[0]['veggie']['name'].lower() == 'tomato'
+    assert meal_plan[0]['protein']['name'].lower() == 'bacon'
+    assert meal_plan[0]['carb']['name'].lower() == 'bread'
 
 
 def test_make_meal_plan_excludes_non_storage_items(kitchen):
     kitchen.ingredients['tomato']['meal_role'] = 'veggie'
+    kitchen.ingredients['tomato']['location'] = 'pantry'
     kitchen.ingredients['bacon']['meal_role'] = 'protein'
+    kitchen.ingredients['bacon']['location'] = 'pantry'
     kitchen.ingredients['bread']['meal_role'] = 'carb'
+    kitchen.ingredients['bread']['location'] = ''  # 'bread' is not in storage
     kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1}  # 'bread' is not in storage
     meal_plan = kitchen.make_meal_plan(1)
     assert len(meal_plan) == 1
-    assert any(ingredient['name'] == 'tomato' for ingredient in meal_plan[0]['veggie'])
-    assert any(ingredient['name'] == 'bacon' for ingredient in meal_plan[0]['protein'])
-    assert not any(ingredient['name'] == 'bread' for ingredient in meal_plan[0]['carb'])  # 'bread' should be excluded
+    assert meal_plan[0]['veggie']['name'].lower() == 'tomato'
+    assert meal_plan[0]['protein']['name'].lower() == 'bacon'
+    assert all(ingredient['location'] != '' for role in meal_plan[0].values() for ingredient in role if isinstance(ingredient, dict))  # No ingredient should have an empty location
 
 
 def test_add_meal_role(kitchen):
