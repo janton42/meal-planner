@@ -134,8 +134,18 @@ class Recipe(RealThing):
         self.ingredients = kwargs.get('ingredients', list())
         self.directions = kwargs.get('directions', '')
         self.is_healthy = kwargs.get('is_healthy', False)
+        self.meal_roles = kwargs.get('meal_roles', list())
 
     # Create operations for the Recipe class
+    def add_meal_role(self, meal_role: str):
+        if meal_role in self.meal_roles:
+            print(f'{meal_role} already in meal roles list.')
+            return f'{meal_role} already in meal roles list.'
+        else:
+            self.meal_roles.append(meal_role)
+            print(f'{meal_role} added to meal roles list.')
+            return f'{meal_role} added to meal roles list.'
+
     def add_ingredient(self, ingredient: Ingredient, quantity: str):
         self.ingredients.append({'name': ingredient.name, 'quantity': quantity})
         print(f'{ingredient.name} added to {self.name} ingredients list.')
@@ -167,6 +177,15 @@ class Recipe(RealThing):
     def remove_ingredient(self, ingredient):
         self.ingredients = [i for i in self.ingredients if i['name'] != ingredient.name]
         print(f"{ingredient.name} removed from {self.name} ingredients list.")
+
+    def remove_meal_role(self, meal_role: str):
+        if meal_role in self.meal_roles:
+            self.meal_roles.remove(meal_role)
+            print(f'{meal_role} removed from meal roles list.')
+            return f'{meal_role} removed from meal roles list.'
+        else:
+            print(f'{meal_role} not found in meal roles list.')
+            return f'{meal_role} not found in meal roles list.'
 
 
 class Storage(RealThing):

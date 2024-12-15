@@ -3,6 +3,7 @@ import os
 import json
 
 from meal_planner.classes import RealThing, Ingredient, Recipe, Storage, Kitchen
+from meal_planner.generator import load_record
 
 
 # RealThing tests
@@ -375,7 +376,12 @@ def kitchen(tmp_path):
         json.dump({"name": "Pantry", "contents": {"Canned Beans": 1}}, f)
     with open(recipes_path / "blt_sandwich.json", "w") as f:
         json.dump({"name": "BLT Sandwich", "ingredients": [{"name": "Bacon", "quantity": "1 lb."}],
-                   "directions": "Cook the bacon until crispy.", "is_healthy": False}, f)
+                   "directions": "Cook the bacon until crispy.", "is_healthy": False,
+                   "meal_roles": [
+                          "protein",
+                          "carb",
+                          "veggie"
+                   ], "subpath": "recipes"}, f)
     with open(ingredients_path / "tomato.json", "w") as f:
         json.dump({"name": "Tomato", "state": "Fresh", "measures": ["1 cup"], "expiration": "2023-12-31",
                    "location": "Fridge", "macros": {"protein": "low", "fats": "low", "carbs": "low"},
@@ -430,7 +436,10 @@ def test_refresh_data(kitchen, tmp_path):
         json.dump({"name": "Fridge", "contents": {"Milk": 2}}, f)
     with open(new_recipes_path / "tomato_soup.json", "w") as f:
         json.dump({"name": "Tomato Soup", "ingredients": [{"name": "Tomato", "quantity": "2 cups"}],
-                   "directions": "Blend the tomatoes.", "is_healthy": True}, f)
+                   "directions": "Blend the tomatoes.", "is_healthy": True,
+                   "meal_roles": [
+                       "veggie"
+                   ], "subpath": "recipes"}, f)
     with open(new_ingredients_path / "lettuce.json", "w") as f:
         json.dump({"name": "Lettuce", "state": "Fresh", "measures": ["1 leaf"], "expiration": "2023-12-31",
                    "location": "Fridge", "macros": {"protein": "low", "fats": "low", "carbs": "low"},
@@ -494,3 +503,23 @@ def test_make_meal_plan_with_meal_roles(kitchen):
     assert kitchen.ingredients['tomato'] in meal_plan[0]['veggie']
     assert kitchen.ingredients['bacon'] in meal_plan[0]['protein']
     assert kitchen.ingredients['bread'] in meal_plan[0]['carb']
+
+def test_add_meal_role(kitchen):
+    recipe = load_record(kitchen.recipes['blt_sandwich'])
+    result = recipe.add_meal_role('breakfast')
+    assert 'breakfast' in recipe.meal_roles
+    assert result == 'breakfast added to meal roles list.'
+
+    result = recipe.add_meal_role('breakfast')
+    assert result == 'breakfast already in meal roles list.'
+
+
+def test_remove_meal_role(kitchen):
+    recipe = load_record(kitchen.recipes['blt_sandwich'])
+    recipe.add_meal_role('breakfast')
+    result = recipe.remove_meal_role('breakfast')
+    assert 'breakfast' not in recipe.meal_roles
+    assert result == 'breakfast removed from meal roles list.'
+
+    result = recipe.remove_meal_role('breakfast')
+    assert result == 'breakfast not found in meal roles list.'
