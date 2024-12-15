@@ -147,8 +147,12 @@ class Recipe(RealThing):
             return f'{meal_role} added to meal roles list.'
 
     def add_ingredient(self, ingredient: Ingredient, quantity: str):
-        self.ingredients.append({'name': ingredient.name, 'quantity': quantity})
-        print(f'{ingredient.name} added to {self.name} ingredients list.')
+        new_ingredient = {'name': ingredient.name, 'quantity': quantity}
+        if new_ingredient not in self.ingredients:
+            self.ingredients.append(new_ingredient)
+        success_message = f'{ingredient.name} added to {self.name} ingredients list.'
+        print(success_message)
+        return success_message
 
     def add_directions(self, directions: str):
         self.directions = directions

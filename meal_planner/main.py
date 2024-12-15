@@ -1,9 +1,9 @@
 
 from meal_planner.classes import Kitchen, Storage, Ingredient, Recipe
 from meal_planner.funcs import plan_display
+from meal_planner.generator import load_record
 
 def main(kitchen):
-    print('start main function')
     choice = int(
         input('*************\nEnter the number of your choice:\n'
               '0. Quit\n'
@@ -33,9 +33,43 @@ def main(kitchen):
         new_ingredient.save_self()
         kitchen.refresh_data()
         main(kitchen)
+
     elif choice == 4: # Add a Recipe
-        print('Not yet implemented')
+        for r in kitchen.recipes:
+            print(r)
+        name = input('Enter a new recipe name: ')
+        new_recipe = Recipe(name)
+        recipe_choice = input('What would you like to do?\n'
+                              '1. Add Directions\n'
+                              '2. Add Ingredients\n'
+                              '3. Save Recipe & Exit\n\n\n')
+        while recipe_choice != '3':
+            if recipe_choice == '1':
+                directions = input('Type your directions below:\n\n\n')
+                new_recipe.add_directions(directions)
+            elif recipe_choice == '2':
+                done_adding = False
+                while not done_adding:
+                    name = input('Enter an ingredient name: ')
+                    name = name.strip().lower()
+                    if name in kitchen.ingredients:
+                        ingredient = load_record(kitchen.ingredients[name])
+                    else:
+                        ingredient = Ingredient(name)
+                        ingredient.save_self()
+                    quantity = input(f'Enter a quantity of {name} to use:\n\n')
+                    new_recipe.add_ingredient(ingredient, quantity)
+                    finished = input('Add more ingredients? (y/n):    ')
+                    if finished == 'n':
+                        done_adding = True
+            recipe_choice = input('What would you like to do?\n'
+                                      '1. Add Directions\n'
+                                      '2. Add Ingredients\n'
+                                      '3. Save Recipe & Exit\n\n\n')
+        new_recipe.save_self()
+        kitchen.refresh_data()
         main(kitchen)
+
     elif choice == 5: # Add a Storage Location
         name = input('Storage Location Name:  ')
         new_location = Storage(name)

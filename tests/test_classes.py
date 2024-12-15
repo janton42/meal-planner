@@ -226,16 +226,76 @@ def recipe():
 def test_add_ingredient(recipe):
     ingredient = Ingredient('Bacon')
     quantity = '1 lb.'
-    recipe.add_ingredient(ingredient, quantity)
-    assert len(recipe.ingredients) == 1
-    assert recipe.ingredients[0] == {'name': 'Bacon', 'quantity': '1 lb.'}
+    result = recipe.add_ingredient(ingredient, quantity)
+    assert {'name': 'Bacon', 'quantity': quantity} in recipe.ingredients
+    assert result == 'Bacon added to Test Recipe ingredients list.'
 
+def test_add_ingredient_with_different_quantity():
+    recipe = Recipe('BLT Sandwich')
+    ingredient = Ingredient('Bacon')
+    recipe.add_ingredient(ingredient, '2 slices')
+    result = recipe.add_ingredient(ingredient, '3 slices')
+    assert {'name': 'Bacon', 'quantity': '2 slices'} in recipe.ingredients
+    assert {'name': 'Bacon', 'quantity': '3 slices'} in recipe.ingredients
+    assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
+def test_add_ingredient_with_empty_quantity():
+    recipe = Recipe('BLT Sandwich')
+    ingredient = Ingredient('Bacon')
+    result = recipe.add_ingredient(ingredient, '')
+    assert {'name': 'Bacon', 'quantity': ''} in recipe.ingredients
+    assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
+def test_add_ingredient_with_special_characters_in_quantity():
+    recipe = Recipe('BLT Sandwich')
+    ingredient = Ingredient('Bacon')
+    result = recipe.add_ingredient(ingredient, '2 slices @ 50% off')
+    assert {'name': 'Bacon', 'quantity': '2 slices @ 50% off'} in recipe.ingredients
+    assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
+def test_add_ingredient_with_numeric_quantity():
+    recipe = Recipe('BLT Sandwich')
+    ingredient = Ingredient('Bacon')
+    result = recipe.add_ingredient(ingredient, '100')
+    assert {'name': 'Bacon', 'quantity': '100'} in recipe.ingredients
+    assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
+def test_add_ingredient_with_none_quantity():
+    recipe = Recipe('BLT Sandwich')
+    ingredient = Ingredient('Bacon')
+    result = recipe.add_ingredient(ingredient, None)
+    assert {'name': 'Bacon', 'quantity': None} in recipe.ingredients
+    assert result == 'Bacon added to BLT Sandwich ingredients list.'
 
 def test_add_directions(recipe):
     directions = 'Cook the bacon until crispy.'
     recipe.add_directions(directions)
     assert recipe.directions == directions
 
+def test_add_empty_directions(recipe):
+    directions = ''
+    recipe.add_directions(directions)
+    assert recipe.directions == directions
+
+def test_add_long_directions(recipe):
+    directions = ' '.join(['Step'] * 1000)
+    recipe.add_directions(directions)
+    assert recipe.directions == directions
+
+def test_add_directions_with_special_characters(recipe):
+    directions = 'Preheat oven to 350°F. Mix ingredients & bake for 20-25 minutes.'
+    recipe.add_directions(directions)
+    assert recipe.directions == directions
+
+def test_add_directions_with_newlines(recipe):
+    directions = 'Step 1: Preheat oven.\nStep 2: Mix ingredients.\nStep 3: Bake.'
+    recipe.add_directions(directions)
+    assert recipe.directions == directions
+
+def test_add_directions_with_unicode(recipe):
+    directions = 'Mix ingredients: 1 cup of flour, 2 eggs, and 1/2 cup of milk. 🍰'
+    recipe.add_directions(directions)
+    assert recipe.directions == directions
 
 def test_set_health_value(recipe):
     response = recipe.set_health_value(True)
