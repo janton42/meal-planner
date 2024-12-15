@@ -3,19 +3,75 @@ from meal_planner.classes import Kitchen, Storage, Ingredient, Recipe
 from meal_planner.funcs import plan_display
 
 def main(kitchen):
-    choice = int(input('*************\nEnter the number of your choice:\n0. Quit\n1. Make a plan\n2. Add an ingredient'))
-    if choice == 1:
-        days = int(input('How many days?  '))
+    choice = int(
+        input('*************\nEnter the number of your choice:\n'
+              '0. Quit\n'
+              '1. Make a plan\n'
+              '2. Show Inventory\n'
+              '3. Add an Ingredient\n'
+              '4. Add a Recipe\n'
+              '5. Add a Storage Location\n'
+              '6. Edit an Ingredient\n'
+              '7. Edit a Recipe\n'
+              '8. Edit a Storage Location\n'
+              '*************\n\n\n\n'
+              ))
+    if choice == 1: # Make a Plan
+        days = int(input('How many days do you want to plan?  '))
         plan = kitchen.make_meal_plan(days)
         plan_display(plan)
         main(kitchen)
-    elif choice == 2:
+    elif choice == 2: # Show Inventory
+        kitchen.show_inventory()
+        main(kitchen)
+    elif choice == 3: # Add an Ingredient
         name = input('Ingredient Name:  ')
         meal_role = input('What role does this ingredient play in a meal (veggie, protein, carb)?  ')
         location = input('Where is this ingredient stored (fridge, cupboard)?  ')
         new_ingredient = Ingredient(name, meal_role=meal_role, location=location)
         new_ingredient.save_self()
+        kitchen.refresh_data()
         main(kitchen)
+    elif choice == 4: # Add a Recipe
+        name = input('Recipe Name:  ')
+        new_recipe = Recipe(name)
+        kitchen.show_inventory()
+        ingredients = input(''
+                            '\nEnter the ingredients with comma-separated quantities for this recipe\n  '
+                            '\tSeparate each ingredient with a semicolon\n': )
+        ingredient_list = ingredients.split(';')
+
+        for i in range(len(ingredient_list)):
+            ingredient_pair = dict()
+            ingredient_list[i] = ingredient_list[i].strip()
+            ingredient_list[i] = ingredient_list[i].split(',')
+            ingredient_pair['name'] = ingredient_list[i][0]
+            ingredient_pair['quantity'] = ingredient_list[i][1]
+
+        for i in kitchen.ingredients:
+            if i.name == ingredient:
+                ingredient = i
+        quantity = ingredients.split(',')[1]
+        new_recipe.add_ingredient(ingredient, quantity)
+        directions = input('Enter the directions for this recipe:  ')
+        new_recipe.add_directions(directions)
+        new_recipe.save_self()
+        kitchen.refresh_data()
+        main(kitchen)
+    elif choice == 5: # Add a Storage Location
+        name = input('Storage Location Name:  ')
+        new_location = Storage(name)
+        new_location.save_self()
+        kitchen.refresh_data()
+        main(kitchen)
+
+    elif choice == 6: # Edit an Ingredient
+        print('Not yet implemented')
+    elif choice == 7: # Edit a Recipe
+        print('Not yet implemented')
+    elif choice == 8: # Edit a Storage Location
+        print('Not yet implemented')
+
     elif choice == 0:
         print('Good bye!')
     else:
