@@ -18,13 +18,9 @@ def main(kitchen):
               '*************\n\n\n\n'
               ))
     if choice == 1:  # Make a Plan
-        print('make plan selected')
         days = int(input('How many days do you want to plan?  '))
-        print(f'{days} days selected')
         plan = kitchen.make_meal_plan(days)
-        print('plan made')
         plan_display(plan)
-        print('plan displayed')
         main(kitchen)
     elif choice == 2: # Show Inventory
         kitchen.show_inventory()
