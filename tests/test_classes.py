@@ -215,8 +215,6 @@ def test_set_meal_role(ingredient):
     assert response == 'Meal role is already set to "carb".'
 
 
-# Test for make_meal_plan method
-
 # Recipe tests
 @pytest.fixture
 def recipe():
@@ -230,6 +228,7 @@ def test_add_ingredient(recipe):
     assert {'name': 'Bacon', 'quantity': quantity} in recipe.ingredients
     assert result == 'Bacon added to Test Recipe ingredients list.'
 
+
 def test_add_ingredient_with_different_quantity():
     recipe = Recipe('BLT Sandwich')
     ingredient = Ingredient('Bacon')
@@ -239,12 +238,14 @@ def test_add_ingredient_with_different_quantity():
     assert {'name': 'Bacon', 'quantity': '3 slices'} in recipe.ingredients
     assert result == 'Bacon added to BLT Sandwich ingredients list.'
 
+
 def test_add_ingredient_with_empty_quantity():
     recipe = Recipe('BLT Sandwich')
     ingredient = Ingredient('Bacon')
     result = recipe.add_ingredient(ingredient, '')
     assert {'name': 'Bacon', 'quantity': ''} in recipe.ingredients
     assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
 
 def test_add_ingredient_with_special_characters_in_quantity():
     recipe = Recipe('BLT Sandwich')
@@ -253,12 +254,14 @@ def test_add_ingredient_with_special_characters_in_quantity():
     assert {'name': 'Bacon', 'quantity': '2 slices @ 50% off'} in recipe.ingredients
     assert result == 'Bacon added to BLT Sandwich ingredients list.'
 
+
 def test_add_ingredient_with_numeric_quantity():
     recipe = Recipe('BLT Sandwich')
     ingredient = Ingredient('Bacon')
     result = recipe.add_ingredient(ingredient, '100')
     assert {'name': 'Bacon', 'quantity': '100'} in recipe.ingredients
     assert result == 'Bacon added to BLT Sandwich ingredients list.'
+
 
 def test_add_ingredient_with_none_quantity():
     recipe = Recipe('BLT Sandwich')
@@ -267,35 +270,42 @@ def test_add_ingredient_with_none_quantity():
     assert {'name': 'Bacon', 'quantity': None} in recipe.ingredients
     assert result == 'Bacon added to BLT Sandwich ingredients list.'
 
+
 def test_add_directions(recipe):
     directions = 'Cook the bacon until crispy.'
     recipe.add_directions(directions)
     assert recipe.directions == directions
+
 
 def test_add_empty_directions(recipe):
     directions = ''
     recipe.add_directions(directions)
     assert recipe.directions == directions
 
+
 def test_add_long_directions(recipe):
     directions = ' '.join(['Step'] * 1000)
     recipe.add_directions(directions)
     assert recipe.directions == directions
+
 
 def test_add_directions_with_special_characters(recipe):
     directions = 'Preheat oven to 350°F. Mix ingredients & bake for 20-25 minutes.'
     recipe.add_directions(directions)
     assert recipe.directions == directions
 
+
 def test_add_directions_with_newlines(recipe):
     directions = 'Step 1: Preheat oven.\nStep 2: Mix ingredients.\nStep 3: Bake.'
     recipe.add_directions(directions)
     assert recipe.directions == directions
 
+
 def test_add_directions_with_unicode(recipe):
     directions = 'Mix ingredients: 1 cup of flour, 2 eggs, and 1/2 cup of milk. 🍰'
     recipe.add_directions(directions)
     assert recipe.directions == directions
+
 
 def test_set_health_value(recipe):
     response = recipe.set_health_value(True)
@@ -513,78 +523,6 @@ def test_refresh_data(kitchen, tmp_path):
     assert ('lettuce') in [i for i in kitchen.ingredients]
 
 
-def test_make_meal_plan_zero_days(kitchen):
-    meal_plan = kitchen.make_meal_plan(0)
-    assert meal_plan == {}
-
-
-def test_make_meal_plan_single_day(kitchen):
-    meal_plan = kitchen.make_meal_plan(1)
-    assert len(meal_plan) == 1
-    assert 'veggie' in meal_plan[0]
-    assert 'protein' in meal_plan[0]
-    assert 'carb' in meal_plan[0]
-
-
-def test_make_meal_plan_multiple_days(kitchen):
-    meal_plan = kitchen.make_meal_plan(3)
-    assert len(meal_plan) == 3
-    for day in range(3):
-        assert 'veggie' in meal_plan[day]
-        assert 'protein' in meal_plan[day]
-        assert 'carb' in meal_plan[day]
-
-
-def test_make_meal_plan_no_ingredients(kitchen):
-    kitchen.ingredients = {}
-    kitchen.storages['pantry']['contents'] = {}
-    meal_plan = kitchen.make_meal_plan(1)
-    assert len(meal_plan) == 1
-    assert meal_plan[0].get('veggie', []) == []
-    assert meal_plan[0].get('protein', []) == []
-    assert meal_plan[0].get('carb', []) == []
-
-
-def test_make_meal_plan_no_meal_roles(kitchen):
-    for ingredient in kitchen.ingredients.values():
-        ingredient['meal_role'] = ''
-    meal_plan = kitchen.make_meal_plan(1)
-    assert len(meal_plan) == 1
-    assert meal_plan[0]['veggie'] == []
-    assert meal_plan[0]['protein'] == []
-    assert meal_plan[0]['carb'] == []
-
-
-def test_make_meal_plan_with_meal_roles_and_storage(kitchen):
-    kitchen.ingredients['tomato']['meal_role'] = 'veggie'
-    kitchen.ingredients['tomato']['location'] = 'pantry'
-    kitchen.ingredients['bacon']['meal_role'] = 'protein'
-    kitchen.ingredients['bacon']['location'] = 'pantry'
-    kitchen.ingredients['bread']['meal_role'] = 'carb'
-    kitchen.ingredients['bread']['location'] = 'pantry'
-    kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1, 'bread': 1}
-    meal_plan = kitchen.make_meal_plan(1)
-    assert len(meal_plan) == 1
-    assert meal_plan[0]['veggie']['name'].lower() == 'tomato'
-    assert meal_plan[0]['protein']['name'].lower() == 'bacon'
-    assert meal_plan[0]['carb']['name'].lower() == 'bread'
-
-
-def test_make_meal_plan_excludes_non_storage_items(kitchen):
-    kitchen.ingredients['tomato']['meal_role'] = 'veggie'
-    kitchen.ingredients['tomato']['location'] = 'pantry'
-    kitchen.ingredients['bacon']['meal_role'] = 'protein'
-    kitchen.ingredients['bacon']['location'] = 'pantry'
-    kitchen.ingredients['bread']['meal_role'] = 'carb'
-    kitchen.ingredients['bread']['location'] = ''  # 'bread' is not in storage
-    kitchen.storages['pantry']['contents'] = {'tomato': 1, 'bacon': 1}  # 'bread' is not in storage
-    meal_plan = kitchen.make_meal_plan(1)
-    assert len(meal_plan) == 1
-    assert meal_plan[0]['veggie']['name'].lower() == 'tomato'
-    assert meal_plan[0]['protein']['name'].lower() == 'bacon'
-    assert all(ingredient['location'] != '' for role in meal_plan[0].values() for ingredient in role if isinstance(ingredient, dict))  # No ingredient should have an empty location
-
-
 def test_add_meal_role(kitchen):
     recipe = load_record(kitchen.recipes['blt_sandwich'])
     result = recipe.add_meal_role('breakfast')
@@ -604,3 +542,193 @@ def test_remove_meal_role(kitchen):
 
     result = recipe.remove_meal_role('breakfast')
     assert result == 'breakfast not found in meal roles list.'
+
+
+def test_make_meal_plan(kitchen):
+    meal_plan = kitchen.make_meal_plan(3)
+    assert len(meal_plan) == 3
+    for day, meals in meal_plan.items():
+        assert 'veggie' in meals
+        assert 'protein' in meals
+        assert 'carb' in meals
+        assert meals['veggie'] is not None
+        assert meals['protein'] is not None
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_only_recipes(kitchen):
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(3)
+    assert len(meal_plan) == 3
+    for day, meals in meal_plan.items():
+        assert meals['veggie'] is not None
+        assert meals['protein'] is not None
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_only_ingredients(kitchen):
+    kitchen.recipes = {}
+    meal_plan = kitchen.make_meal_plan(3)
+    assert len(meal_plan) == 3
+    for day, meals in meal_plan.items():
+        assert meals['veggie'] is not None
+        assert meals['protein'] is not None
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_more_days_than_items(kitchen):
+    meal_plan = kitchen.make_meal_plan(10)
+    assert len(meal_plan) == 10
+    for day, meals in meal_plan.items():
+        assert meals['veggie'] is not None
+        assert meals['protein'] is not None
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_veggie_in_proteins(kitchen):
+    kitchen.recipes = {
+        'veggie_protein_recipe': {'name': 'Veggie Protein Recipe', 'meal_roles': ['veggie', 'protein'],
+                                  'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_recipe': {'name': 'Protein Recipe', 'meal_roles': ['protein'],
+                           'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_recipe': {'name': 'Carb Recipe', 'meal_roles': ['carb'],
+                        'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Veggie Protein Recipe'
+        assert meals['protein']['name'] == 'Veggie Protein Recipe'
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_veggie_in_carbs(kitchen):
+    kitchen.recipes = {
+        'veggie_carb_recipe': {'name': 'Veggie Carb Recipe', 'meal_roles': ['veggie', 'carb'],
+                               'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_recipe': {'name': 'Protein Recipe', 'meal_roles': ['protein'],
+                           'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_recipe': {'name': 'Carb Recipe', 'meal_roles': ['carb'],
+                        'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Veggie Carb Recipe'
+        assert meals['protein'] is not None
+        assert meals['carb']['name'] == 'Veggie Carb Recipe'
+
+
+def test_make_meal_plan_protein_in_veggies_and_carbs(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Carb Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_veggie_carbs_recipe': {
+            'name': 'Protein Veggie Carbs Recipe', 'meal_roles': ['protein', 'veggie', 'carb'],
+            'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_recipe': {'name': 'Carb Recipe', 'meal_roles': ['carb'],
+                        'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Protein Veggie Carbs Recipe'
+        assert meals['protein']['name'] == 'Protein Veggie Carbs Recipe'
+        assert meals['carb']['name'] == 'Protein Veggie Carbs Recipe'
+
+
+def test_make_meal_plan_protein_in_veggies(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_veggie_recipe': {'name': 'Protein Veggie Recipe', 'meal_roles': ['protein', 'veggie'],
+                                  'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_recipe': {'name': 'Carb Recipe', 'meal_roles': ['carb'],
+                        'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Protein Veggie Recipe'
+        assert meals['protein']['name'] == 'Protein Veggie Recipe'
+        assert meals['carb'] is not None
+
+
+def test_make_meal_plan_protein_in_carbs(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_carb_recipe': {'name': 'Protein Carb Recipe', 'meal_roles': ['protein', 'carb'],
+                                'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_recipe': {'name': 'Carb Recipe', 'meal_roles': ['carb'],
+                        'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie'] is not None
+        assert meals['protein']['name'] == 'Protein Carb Recipe'
+        assert meals['carb']['name'] == 'Protein Carb Recipe'
+
+
+def test_make_meal_plan_carb_in_veggies_and_proteins(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Carb Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_recipe': {
+            'name': 'Protein Recipe', 'meal_roles': ['protein'],
+            'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_protein_veggie_recipe': {'name': 'Carb Protein Veggie Recipe',
+                                       'meal_roles': ['protein', 'veggie', 'carb'],
+                                       'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Carb Protein Veggie Recipe'
+        assert meals['protein']['name'] == 'Carb Protein Veggie Recipe'
+        assert meals['carb']['name'] == 'Carb Protein Veggie Recipe'
+
+
+def test_make_meal_plan_carb_in_veggies(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Carb Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_recipe': {
+            'name': 'Protein Recipe', 'meal_roles': ['protein'],
+            'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_veggie_recipe': {'name': 'Carb Veggie Recipe', 'meal_roles': ['veggie', 'carb'],
+                               'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie']['name'] == 'Carb Veggie Recipe'
+        assert meals['protein'] is not None
+        assert meals['carb']['name'] == 'Carb Veggie Recipe'
+
+
+def test_make_meal_plan_carb_in_proteins(kitchen):
+    kitchen.recipes = {
+        'veggie_recipe': {'name': 'Veggie Carb Recipe', 'meal_roles': ['veggie'],
+                          'ingredients': [], 'directions': '', 'is_healthy': True},
+        'protein_recipe': {
+            'name': 'Protein Recipe', 'meal_roles': ['protein'],
+            'ingredients': [], 'directions': '', 'is_healthy': True},
+        'carb_protein_veggie_recipe': {'name': 'Carb Protein Recipe', 'meal_roles': ['protein', 'carb'],
+                                       'ingredients': [], 'directions': '', 'is_healthy': True}
+    }
+    kitchen.ingredients = {}
+    meal_plan = kitchen.make_meal_plan(1)
+    assert len(meal_plan) == 1
+    for day, meals in meal_plan.items():
+        assert meals['veggie'] is not None
+        assert meals['protein']['name'] == 'Carb Protein Recipe'
+        assert meals['carb']['name'] == 'Carb Protein Recipe'

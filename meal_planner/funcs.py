@@ -50,3 +50,9 @@ def plan_display(plan):
         message = f"Day {day}:\n |--veggie: {plan[day]['veggie']['name']}\n |--protein: {plan[day]['protein']['name']}\n |--carb: {plan[day]['carb']['name']}\n"
         print(message)
     print()  # Add a newline after each day
+
+
+def pointer_return(limit: int, pointer: int):
+    if pointer > limit:
+        pointer *= 0
+    return pointer

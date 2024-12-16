@@ -1,6 +1,6 @@
 import os
 
-from meal_planner.funcs import read_data, write_data, shuffle
+from meal_planner.funcs import read_data, write_data, shuffle, pointer_return
 
 
 class RealThing:
@@ -262,35 +262,87 @@ class Kitchen(RealThing):
         self.ingredients = read_data(ingredients_path)
 
     def make_meal_plan(self, days: int):
+        """ Docstring for make_meal_plan
+        Make a dictionary that will be the final meal plan.
+        """
+
         meal_plan = dict()
+
+        # Compile all the recipies, separated by meal roles
+        #   Recipes can have multiple meal roles, stored as a list of strings,
+        #   and may appear in multiple meal role lists
+        veggie_recipies = shuffle([r for r in self.recipes.values()
+                                   if 'veggie' in r['meal_roles']])
+        protein_recipies = shuffle([r for r in self.recipes.values()
+                                   if 'protein' in r['meal_roles']])
+        carb_recipies = shuffle([r for r in self.recipes.values()
+                                   if 'carb' in r['meal_roles']])
+
+        # Compile ingredients in a similar fashion, grouped by meal role.
+        #   Ingredients have only one meal role.
+        #   Only ingredients in a storage location are included.
+        veggie_ingredients = shuffle(
+            [i for i in self.ingredients.values()
+             if i['meal_role'] == 'veggie' and i['location'] != ''])
+        protein_ingredients = shuffle(
+            [i for i in self.ingredients.values()
+             if i['meal_role'] == 'protein' and i['location'] != ''])
+        carb_ingredients = shuffle(
+            [i for i in self.ingredients.values()
+             if i['meal_role'] == 'carb' and i['location'] != ''])
+
+        # Combine the meal type lists so that the recipes are in the front, and will therefore be given priority in
+        # planning
+        veggies = veggie_recipies + veggie_ingredients
+        proteins = protein_recipies + protein_ingredients
+        carbs = carb_recipies + carb_ingredients
+
+        # Set pointers for each meal type.
+        v_pointer = 0
+        p_pointer = 0
+        c_pointer = 0
         for day in range(days):
-            veggie = shuffle(
-                    [i for i in self.ingredients.values()
-                     if i['meal_role'] == 'veggie' and i['location'] != ''])
-            protein = shuffle(
-                    [i for i in self.ingredients.values()
-                     if i['meal_role'] == 'protein' and i['location'] != ''])
-            carb = shuffle(
-                    [i for i in self.ingredients.values()
-                     if i['meal_role'] == 'carb' and i['location'] != ''])
-            if len(veggie) > 0:
-                veggie = veggie.pop(-1)
-            else:
-                veggie = []
+            # Check each pointer against the length of its respective list's length. If the pointer is outside the
+            # list range, pointer_return resets the pointer to 0
+            v_pointer = pointer_return(limit=len(veggies)-1, pointer=v_pointer)
+            p_pointer = pointer_return(limit=len(veggies) - 1, pointer=p_pointer)
+            c_pointer = pointer_return(limit=len(carbs)-1, pointer=c_pointer)
 
-            if len(protein) > 0:
-                protein = protein.pop(-1)
-            else:
-                protein = []
+            # Set each portion of the meal according to each role list and role pointer
+            veggie = veggies[v_pointer]
+            protein = proteins[p_pointer]
+            carb = carbs[c_pointer]
 
-            if len(carb) > 0:
-                carb = carb.pop(-1)
-            else:
-                carb = []
+            # Giving 'veggies' the priority, check to see if a selected recipe occupies multiple meal roles.
+            # Set all appropriate meal roles, with 'proteins' and 'carbs' coming next in priority in that order.
+            if veggie in proteins and veggie in carbs:
+                protein, carb = veggie, veggie
+            elif veggie in proteins:
+                protein = veggie
+            elif veggie in carbs:
+                carb = veggie
+            elif protein in veggies and protein in carbs:
+                veggie, carb = protein, protein
+            elif protein in veggies:
+                veggie = protein
+            elif protein in carbs:
+                carb = protein
+            elif carb in veggies and carb in proteins:
+                protein, veggie = carb, carb
+            elif carb in veggies:
+                veggie = carb
+            elif carb in proteins:
+                protein = carb
 
+            # Add the day's meal plan to the overall meal plan
             meal_plan[day] = {
                 'veggie': veggie,
                 'protein': protein,
                 'carb': carb,
             }
+
+            # Increment all role pointers by one.
+            v_pointer += 1
+            p_pointer += 1
+            c_pointer += 1
         return meal_plan

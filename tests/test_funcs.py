@@ -1,7 +1,7 @@
 import json
 import os
 
-from meal_planner.funcs import write_data, read_data, shuffle, plan_display
+from meal_planner.funcs import write_data, read_data, shuffle, plan_display, pointer_return
 
 
 def test_write_data(tmp_path):
@@ -77,3 +77,9 @@ def test_plan_display(capsys):
         " |--carb: Potato\n\n\n"
     )
     assert captured.out == expected_output
+
+def test_pointer_return():
+    assert pointer_return(10, 5) == 5
+    assert pointer_return(10, 10) == 10
+    assert pointer_return(10, 11) == 0
+    assert pointer_return(0, 1) == 0
